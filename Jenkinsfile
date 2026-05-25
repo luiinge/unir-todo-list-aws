@@ -1,12 +1,3 @@
-storeBaseURL() {
-
-}
-fetchBaseURL() {
-  unstash 'baseURL'
-  def baseURL = readFile('baseURL.txt').trim()
-  echo "Fetched Base URL: ${baseURL}"
-  return baseURL
-}
 pipeline {
   agent any
 
