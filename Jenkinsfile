@@ -55,15 +55,19 @@ pipeline {
     stage('Promote') {
       agent any
       steps {
-        echo "Promoting to production..."
-        sh '''
-          git config user.email "jenkins@example.com"
-          git config user.name "Jenkins Bot"
-          git checkout master
-          git merge develop --no-edit
-          git push origin master
-    '''
+        withCredentials([usernamePassword(credentialsId: 'github-credentials', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+          sh '''
+            git config user.email "jenkins@example.com"
+            git config user.name "Jenkins Bot"
+            git checkout master
+            git merge develop --no-edit
+            git push https://$GIT_USER:$GIT_PASS@github.com/luiinge/unir-todo-list-aws.git master
+          '''
+        }
       }
     }
+
+    
   }
 }
+  
