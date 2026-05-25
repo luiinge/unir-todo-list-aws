@@ -39,9 +39,11 @@ pipeline {
         sh 'sam build'
         sh 'sam deploy --config-env staging --no-confirm-changeset --no-fail-on-empty-changeset --no-progressbar'
         // Recupera la URL from CloudFormation outputs y la stashea
-        def baseURL = sh(script: "aws cloudformation describe-stacks --stack-name staging-todo-list --query 'Stacks[0].Outputs[?OutputKey==`TodoListApi`].OutputValue' --output text", returnStdout: true).trim()
-        echo "Base URL: ${baseURL}"
-        writeFile file: 'baseURL.txt', text: baseURL
+        script {
+          def baseURL = sh(script: "aws cloudformation describe-stacks --stack-name staging-todo-list --query 'Stacks[0].Outputs[?OutputKey==`TodoListApi`].OutputValue' --output text", returnStdout: true).trim()
+          echo "Base URL: ${baseURL}"
+          writeFile file: 'baseURL.txt', text: baseURL
+        }
         stash includes: 'baseURL.txt', name: 'baseURL'
       }
     }
