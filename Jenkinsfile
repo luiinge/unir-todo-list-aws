@@ -56,6 +56,13 @@ pipeline {
       agent any
       steps {
         echo "Promoting to production..."
+        sh '''
+          git config user.email "jenkins@example.com"
+          git config user.name "Jenkins Bot"
+          git checkout master
+          git merge develop --no-edit
+          git push origin master
+    '''
       }
     }
   }
