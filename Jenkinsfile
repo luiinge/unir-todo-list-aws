@@ -6,32 +6,19 @@ pipeline {
     stage('Get Code') {
       agent any
       steps {
-        git branch: 'develop', changelog: false, poll: false, url: 'https://github.com/luiinge/unir-todo-list-aws.git'
+        git branch: 'master', changelog: false, poll: false, url: 'https://github.com/luiinge/unir-todo-list-aws.git'
       }
     }
 
-    stage('Static Test') {
-      agent any
-      steps {
-        sh 'flake8 src --format=pylint --exit-zero > flake8.out'
-        catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
-          recordIssues tools: [flake8(pattern:'flake8.out')]
-        }
-        sh 'bandit -r src -f custom -o bandit.out --msg-template "{abspath}:{line}: {severity}: {test_id}: {msg}"'
-        catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
-          recordIssues tools: [pyLint(pattern:'bandit.out')]
-        }
-      }
-    }
 
     stage('Deploy') {
       agent any
       steps {
         sh 'sam build'
-        sh 'sam deploy --config-env staging --no-confirm-changeset --no-fail-on-empty-changeset --no-progressbar'
+        sh 'sam deploy --config-env production --no-confirm-changeset --no-fail-on-empty-changeset --no-progressbar'
         // Recupera la URL from CloudFormation outputs y la stashea
         script {
-          def baseURL = sh(script: "aws cloudformation describe-stacks --stack-name staging-todo-list-aws --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --output text", returnStdout: true).trim()
+          def baseURL = sh(script: "aws cloudformation describe-stacks --stack-name production-todo-list-aws --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --output text", returnStdout: true).trim()
           echo "Base URL: ${baseURL}"
           writeFile file: 'baseURL.txt', text: baseURL
         }
@@ -43,31 +30,19 @@ pipeline {
       agent any
       steps {
         unstash 'baseURL'
+        // solo ejecutar test de smoke
         sh '''
           export BASE_URL=$(cat baseURL.txt)
           echo "Testing API at $BASE_URL"
-          pytest test/integration/todoApiTest.py -v --junit-xml=results.xml
+          pytest test/integration/todoApiTest.py -m smoke-v --junit-xml=results.xml
         '''
         junit 'results.xml'
       }
     }
 
-    stage('Promote') {
-      agent any
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'github-credentials', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
-          sh '''
-            git config user.email "jenkins@example.com"
-            git config user.name "Jenkins Bot"
-            git checkout master
-            git merge develop --no-edit
-            git push https://$GIT_USER:$GIT_PASS@github.com/luiinge/unir-todo-list-aws.git master
-          '''
-        }
-      }
-    }
-
     
+
+
   }
 }
   
