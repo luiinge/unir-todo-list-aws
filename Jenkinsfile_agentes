@@ -42,7 +42,7 @@ pipeline {
         script { logAgentInfo() }
         unstash 'src'
         sh '''
-          curl -o samconfig.toml https://raw.githubusercontent.com/luiinge/todo-list-aws-config/staging/samconfig.toml
+          curl -o samconfig.toml https://raw.githubusercontent.com/luiinge/unir-todo-list-aws-config/staging/samconfig.toml
           cat samconfig.toml
         '''
         sh 'sam build'
