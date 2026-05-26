@@ -80,7 +80,7 @@ pipeline {
             git config user.email "jenkins@example.com"
             git config user.name "Jenkins Bot"
             git checkout master
-            git merge develop --no-edit -X ours -- Jenkinsfile Jenkinsfile_agentes
+            git merge origin/develop --no-edit -X ours -- Jenkinsfile Jenkinsfile_agentes
             git push https://$GIT_USER:$GIT_PASS@github.com/luiinge/unir-todo-list-aws.git master
           '''
         }
