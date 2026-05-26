@@ -25,6 +25,10 @@ pipeline {
       steps {
         script { logAgentInfo() }
         unstash 'src'
+        sh '''
+          # Descargar samconfig.toml de la rama production
+          curl -sO https://raw.githubusercontent.com/luiinge/todo-list-aws-config/production/samconfig.toml
+        '''
         sh 'sam build'
         sh 'sam deploy --config-env production --no-confirm-changeset --no-fail-on-empty-changeset --no-progressbar'
         // Recupera la URL from CloudFormation outputs y la stashea
