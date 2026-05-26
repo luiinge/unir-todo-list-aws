@@ -34,7 +34,7 @@ pipeline {
         sh '''
           export BASE_URL=$(cat baseURL.txt)
           echo "Testing API at $BASE_URL"
-          pytest test/integration/todoApiTest.py -m smoke-v --junit-xml=results.xml
+          pytest test/integration/todoApiTest.py -m smoke -v --junit-xml=results.xml
         '''
         junit 'results.xml'
       }
