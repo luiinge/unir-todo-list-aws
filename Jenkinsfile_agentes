@@ -33,8 +33,7 @@ pipeline {
                recordIssues tools: [pyLint(pattern:'bandit.out')]
              }
              cleanWs()
-          }
-        }      
+          }    
     }
 
     stage('Deploy') {
